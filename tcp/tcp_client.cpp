@@ -6,8 +6,10 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include "tcp.hpp"
 #include <unistd.h>
+
+#include "tcp.hpp"
+#include "../shared.hpp"
 
 const int ERROR_CODE = -1;
 
@@ -29,18 +31,6 @@ int init_tsp_client (int port) {
     }
 
     return socket_fd;
-}
-void skip_whitespaces (char *str, int len = -1) {
-    if (len < 0) 
-        len = strlen (str);
-    while (len) {
-        if (isspace(str[len - 1])) {
-            --len;
-        } else {
-            break;
-        }
-    }
-    str[len] = '\0';
 }
 
 int run_client_loop (int server_fd) {

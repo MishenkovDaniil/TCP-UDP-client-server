@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "tcp.hpp"
+#include "../shared.hpp"
 
 const int ERROR_CODE = -1;
 
@@ -41,19 +42,6 @@ int init_tsp_server (int port) {
     }
 
     return socket_fd;
-}
-
-void skip_whitespaces (char *str, int len = -1) {
-    if (len < 0) 
-        len = strlen (str);
-    while (len) {
-        if (isspace(str[len - 1])) {
-            --len;
-        }else {
-            break;
-        }
-    }
-    str[len] = '\0';
 }
 
 int run_server_loop (int client_fd) {
