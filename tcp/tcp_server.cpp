@@ -57,7 +57,7 @@ void skip_whitespaces (char *str, int len = -1) {
 }
 
 int run_server_loop (int client_fd) {
-    const int buf_max_size = 4;
+    const int buf_max_size = 255;
     char buf [buf_max_size] = "";
     
     int n_written_bytes = 0;
