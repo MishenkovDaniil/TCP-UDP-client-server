@@ -23,18 +23,21 @@
 
 |  CLIENT      |     SERVER            |
 | ------------- |:------------------:|
-| ![](/res/client_simple1.png?raw=true "Старт клиента.")     | ![](/res/server_simple1.png?raw=true "Старт сервера.")    |
-| ![](/res/client_simple2.png?raw=true "Старт клиента.")     | ![](/res/server_simple2.png?raw=true "Старт сервера.")    |
+| ![](/res/client_simple1.png?raw=true "Сбщение: клиент.")     | ![](/res/server_simple1.png?raw=true "Сбщение: сервер.")    |
+| ![](/res/client_simple2.png?raw=true "Сбщение: клиент.")     | ![](/res/server_simple2.png?raw=true "Сбщение: сервер.")    |
 
 - Передадим большое сообщение (на самом деле, большим оно является, только потому, что намеренно размер буффера был уменьшен до 8 символов, в общем случае, можно представить буффер обычного размера (несколько кБайт) и сообщение в сотни кБайт):
 
 |  CLIENT      |     SERVER            |
 | ------------- |:------------------:|
-| ![](/res/large_msg_clent.png?raw=true "Старт клиента.")     | ![](/res/large_msg_server.png?raw=true "Старт сервера.")    |
+| ![](/res/large_msg_clent.png?raw=true "длинное сообщение: клиент.")     | ![](/res/large_msg_server.png?raw=true "длинное сообщение: сервер.")    |
 
 - завершим работу на клиенте с помощью команды `exit`, а на сервере остановим поиск новых соединений:
 
-|  CLIENT      |     SERVER            |
-| ------------- |:------------------:|
-| ![](/res/client_full.png?raw=true "Старт клиента.")     | ![](/res/server_full.png?raw=true "Старт сервера.")    |
+|  CLIENT      |
+| ------------- |
+| ![](/res/client_full.png?raw=true "фул клиента.")     |
  
+|  SERVER      |
+| ------------- |
+| ![](/res/server_full.png?raw=true "фул сервера.")    |
