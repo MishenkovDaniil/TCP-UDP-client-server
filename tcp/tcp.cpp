@@ -1,4 +1,4 @@
-// #include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -31,9 +31,30 @@ int tcp::bind_socket (int socket_fd, int port) {
 }
 
 int tcp::send_to (int socket_fd, const void *message, size_t length, int flags) {
+    static size_t len;
+    len = length;
+    send (socket_fd, &len, sizeof (len), flags);
     return send(socket_fd, message, length, flags);
 }
 
 int tcp::recv_from (int socket_fd, void *buf, size_t len, int flags) {
+    size_t send_len;
+    recv (socket_fd, &send_len, sizeof (send_len), flags);
     return recv (socket_fd, buf, len, flags);
+}
+
+void *tcp::recv_all (int socket_fd, void *buf, size_t len, int flags) {
+    size_t send_len;
+    recv (socket_fd, &send_len, sizeof (send_len), flags);
+
+    void *main_buf = buf;
+    if (send_len <= len) {
+        int status = recv (socket_fd, buf, len, flags);
+        return (status == -1) ? nullptr : buf; 
+    }
+
+    main_buf = (void *)calloc (send_len + 1, sizeof(char));
+
+    int status = recv (socket_fd, main_buf, send_len, flags);
+    return (status == -1) ? nullptr : main_buf; 
 }

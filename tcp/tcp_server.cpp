@@ -43,16 +43,36 @@ int init_tsp_server (int port) {
     return socket_fd;
 }
 
+void skip_whitespaces (char *str, int len = -1) {
+    if (len < 0) 
+        len = strlen (str);
+    while (len) {
+        if (isspace(str[len - 1])) {
+            --len;
+        }else {
+            break;
+        }
+    }
+    str[len] = '\0';
+}
+
 int run_server_loop (int client_fd) {
-    char msg [1024] = "";
+    const int buf_max_size = 4;
+    char buf [buf_max_size] = "";
     
-    int n_read_bytes = 0;
     int n_written_bytes = 0;
+    int is_full = 1;
 
     while (1) {
         printf ("Awaiting client msg...\n");
-        n_read_bytes += tcp::recv_from(client_fd, (void*)msg, sizeof(msg), 0);
-        
+
+        char *msg = (char *)tcp::recv_all(client_fd, (void*)buf, buf_max_size - 1, 0);
+        if (!msg) {
+            perror ("recv() error");
+            return ERROR_CODE;
+        }
+        skip_whitespaces (msg);
+
         if(!strcmp(msg, "exit")) {
             printf ("client quit the session.\n");
             break;
@@ -60,25 +80,28 @@ int run_server_loop (int client_fd) {
 
         printf ("client %d: %s\n>", client_fd, msg);
         fflush (stdout);
-        
-        memset(&msg, 0, sizeof(msg));
+        char *buf_addr = &buf[0];
+        if (msg != buf_addr)
+            free (msg);
 
-        int input_size = read(STDIN_FILENO, msg, 1024);
+        memset(&buf, 0, sizeof(buf));
+
+        int input_size = read(STDIN_FILENO, buf, buf_max_size);
         if (input_size < 0) {
             fprintf (stderr, "No input.\n");
             return -1;
         } 
 
-        msg[input_size - 1] = '\0'; // rm '\n' for strcmp 
+        skip_whitespaces (buf);
         
-        if (!strcmp(msg, "exit")) {
-            tcp::send_to(client_fd, (void*)msg, input_size, 0);
+        if (!strcmp(buf, "exit")) {
+            tcp::send_to(client_fd, (void*)buf, input_size, 0);
             printf ("bye-bye!\n");
             break;
         }
 
-        n_written_bytes += tcp::send_to(client_fd, (void*)msg, input_size, 0);
-        memset(&msg, 0, sizeof(msg));
+        n_written_bytes += tcp::send_to(client_fd, (void*)buf, input_size, 0);
+        memset(&buf, 0, sizeof(buf));
     }
     return 0;
 }

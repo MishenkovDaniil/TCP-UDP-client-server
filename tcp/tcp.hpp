@@ -11,5 +11,6 @@ namespace tcp {
     int accept_client (int s, struct sockaddr *addr, socklen_t *addrlen);
     int send_to (int socket_fd, const void *message, size_t length, int flags);
     int recv_from (int s, void *buf, size_t len, int flags);
+    void *recv_all  (int s, void *buf, size_t len, int flags); //nullprt on failure
     int connect_to_server (int socket, const struct sockaddr *address, socklen_t address_len);
 };

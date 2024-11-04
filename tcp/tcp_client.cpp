@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,46 +30,67 @@ int init_tsp_client (int port) {
 
     return socket_fd;
 }
+void skip_whitespaces (char *str, int len = -1) {
+    if (len < 0) 
+        len = strlen (str);
+    while (len) {
+        if (isspace(str[len - 1])) {
+            --len;
+        } else {
+            break;
+        }
+    }
+    str[len] = '\0';
+}
 
 int run_client_loop (int server_fd) {
-    char msg [1024] = "";
+    const int buf_max_size = 1023;
+    char buf [buf_max_size + 1] = "";
     
-    int n_read_bytes = 0;
     int n_written_bytes = 0;
 
     while (1) {
         printf ("> ");
         fflush (stdout);
 
-        int input_size = read(STDIN_FILENO, msg, 1024);
+        int input_size = read(STDIN_FILENO, buf, buf_max_size);
         if (input_size < 0) {
             fprintf (stderr, "No input.\n");
             return -1;
         } 
 
-        msg[input_size - 1] = '\0'; // rm '\n' for strcmp 
+        skip_whitespaces(buf);
 
-        if (!strcmp(msg, "exit")) {
-            tcp::send_to(server_fd, (void*)msg, input_size, 0);
+        if (!strcmp(buf, "exit")) {
+            tcp::send_to(server_fd, (void*)buf, input_size, 0);
             printf ("bye-bye!\n");
             break;
         }
-
-        n_written_bytes += tcp::send_to(server_fd, (void*)msg, input_size, 0);
+        n_written_bytes += tcp::send_to(server_fd, (void*)buf, input_size, 0);
         
         printf ("Awaiting server response...\n");
         
-        memset(&msg, 0, sizeof(msg));
+        memset(&buf, 0, sizeof(buf));
         
-        n_read_bytes += tcp::recv_from(server_fd, (void*)msg, sizeof(msg), 0);
-        
+        char *msg = (char *)tcp::recv_all(server_fd, (void*)buf, buf_max_size, 0);
+        if (!msg) {
+            perror ("recv error");
+            return ERROR_CODE;
+        }
+
+        skip_whitespaces (msg);
+
         if(!strcmp(msg, "exit")) {
             printf ("Server has quit the session.\n");
             break;
         }
 
         printf ("Server: %s\n", msg);
-        memset(&msg, 0, sizeof(msg));
+        char *buf_addr = &buf[0];
+        if (msg != buf_addr) 
+            free (msg);
+
+        memset(&buf, 0, sizeof(buf));
     }
     return 0;
 }
