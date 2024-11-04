@@ -7,13 +7,13 @@ all: src/main.cpp src/widget/widget.cpp src/graphic_structures/vector/vector.cpp
 	./w_manager
 
 build_udp_client: udp/udp.cpp udp/udp_client.cpp 
-	$(CC) udp/udp_client.cpp udp/udp.cpp -o udp/udp_client
+	$(CC) udp/udp_client.cpp udp/udp.cpp $(Debug_flags) -o udp/udp_client
 build_udp_server: udp/udp.cpp udp/udp_server.cpp 
-	$(CC) udp/udp_server.cpp udp/udp.cpp -o udp/udp_server
+	$(CC) udp/udp_server.cpp udp/udp.cpp $(Debug_flags) -o udp/udp_server
 build_tcp_client: tcp/tcp.cpp tcp/tcp_client.cpp 
-	$(CC) tcp/tcp_client.cpp tcp/tcp.cpp -o tcp/tcp_client
-build_tcp_server: tcptcp.cpp tcptcp_server.cpp 
-	$(CC) tcptcp_server.cpp tcptcp.cpp -o tcptcp_server
+	$(CC) tcp/tcp_client.cpp tcp/tcp.cpp $(Debug_flags) -o tcp/tcp_client
+build_tcp_server: tcp/tcp.cpp tcp/tcp_server.cpp 
+	$(CC) tcp/tcp_server.cpp tcp/tcp.cpp $(Debug_flags) -o tcp/tcp_server
 start_udp_server:
 	./udp/udp_server 4457 
 start_udp_client:
