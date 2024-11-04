@@ -6,6 +6,6 @@
 
 ## Запуск
 
-Общий вид запуска: `./<protocol>/<protocol>-<server or client> <port number>`.
+Общий вид запуска: `./<protocol>/<protocol>_<server or client> <port number>`.
 В качестве протоколов используются сокращенные названия: `udp` и `tcp`.
-Например: `./tcp/tcp-client 4460` или `./udp/udp-server 4455`.
+Например: `./tcp/tcp_client 4460` или `./udp/udp_server 4455`.
