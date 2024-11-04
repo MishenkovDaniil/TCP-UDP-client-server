@@ -87,16 +87,6 @@ int main(int argc, char **argv){
     }
 
     run_client_loop (socket_fd);
-    // char buffer[1024] = "";
-
-    // bzero(buffer, 1024);
-    // strcpy(buffer, "Hello, World!");
-    // int bytes_num = tcp::send_to (socket_fd, buffer, sizeof(buffer), 0);
-    // printf("[+]Data send %d: %s\n",bytes_num, buffer);
-
-    // bzero(buffer, 1024);
-    // tcp::recv_from(socket_fd, buffer, sizeof(buffer), 0);
-    // printf("[+]Data recv: %s\n", buffer);
     
     close (socket_fd);
 

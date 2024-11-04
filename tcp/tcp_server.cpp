@@ -1,12 +1,15 @@
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
 #include "tcp.hpp"
 
@@ -18,10 +21,16 @@ int init_tsp_server (int port) {
         perror("create socket error");
         return ERROR_CODE;
     }
+    
+    int fcntl_status = fcntl (socket_fd, F_SETFL, O_NONBLOCK);
+    if (fcntl_status) {
+        perror ("fcntl error");
+        return ERROR_CODE;
+    }
 
     int bind_status = tcp::bind_socket (socket_fd, port);
     if (bind_status) {
-        perror ("bind error:");
+        perror ("bind error");
         return ERROR_CODE;
     }
 
@@ -74,6 +83,20 @@ int run_server_loop (int client_fd) {
     return 0;
 }
 
+int shall_stop_accept () {
+    while (1) {
+        printf ("No clients detected, continue?(y/n)");
+        char ans;
+        while (isspace(ans = getchar())) {;}
+
+        if (ans == 'y') {
+            return 0;
+        } else if (ans == 'n') {
+            return 1;
+        }
+    }
+}
+
 int main(int argc, char **argv){
     if (argc != 2){
         printf("Usage: %s <port>\n", argv[0]);
@@ -88,24 +111,39 @@ int main(int argc, char **argv){
         return ERROR_CODE;
     }
 
-    // char buffer[1024]= "";
-
-    struct sockaddr_in client_addr;
-    memset(&client_addr, '\0', sizeof(client_addr));
-    socklen_t client_addr_size = sizeof(client_addr);
+    int client_socket_fd = 0;
     
-    int client_socket_fd = tcp::accept_client (socket_fd, NULL, NULL);
-    printf ("%d\n", client_socket_fd);
+    int step = 0;
+    while (1) {
+        char cmd[64] = "";
+        int quit = 0;
 
-    run_server_loop (client_socket_fd);
+        if(!step) {
+            printf ("Waiting for client...\n");
+            step = 1;
+        }
+     
+        sleep(5);
+        client_socket_fd = tcp::accept_client (socket_fd, NULL, NULL); //todo: use select () with timeout 
+        if (client_socket_fd < 0) {
+            if (errno == EAGAIN) {
+                if (!(quit = shall_stop_accept ())) {
+                    continue;
+                }
+                break;
+            }
+        }
 
-    // int bytes_recv = tcp::recv_from (client_socket_fd, buffer, sizeof(buffer), 0);
-    // printf("[+]Data recv %d: %s\n",bytes_recv, buffer);
-    // bzero(buffer, 1024);
+        if (client_socket_fd < 0) {
+            perror ("accept error");
+            return ERROR_CODE;
+        }
 
-    // strcpy(buffer, "Welcome");
-    // tcp::send_to(client_socket_fd, buffer, sizeof(buffer), 0);
-    // printf("[+]Data send: %s\n", buffer);
+        printf ("Socket %d just connected.\n", client_socket_fd);
+
+        run_server_loop (client_socket_fd);
+        step = 0;
+    }
 
     close (socket_fd);
 
